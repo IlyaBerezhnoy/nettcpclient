@@ -5,7 +5,11 @@
         <group>
             <file>file:/home/ilia-mint/projects/NetworkTcpClient/src/com/netcracker/mesh_router/ui/networks/client/NetworkTcpClientApplication.java</file>
             <file>file:/home/ilia-mint/projects/NetworkTcpClient/src/com/netcracker/mesh_router/ui/networks/client/NetworkClientApiManager.java</file>
+            <file>file:/home/ilia-mint/projects/NetworkTcpClient/src/com/netcracker/mesh_router/ui/networks/client/Tlv.java</file>
             <file>file:/home/ilia-mint/projects/NetworkTcpClient/src/com/netcracker/mesh_router/ui/networks/client/NetworkClientApi.java</file>
+            <file>file:/home/ilia-mint/projects/NetworkTcpClient/src/com/netcracker/mesh_router/ui/networks/client/SocketServer.java</file>
+            <file>file:/home/ilia-mint/projects/NetworkTcpClient/src/com/netcracker/mesh_router/ui/networks/client/TlvType.java</file>
+            <file>file:/home/ilia-mint/projects/NetworkTcpClient/src/com/netcracker/mesh_router/ui/networks/client/TlvBox.java</file>
         </group>
     </open-files>
 </project-private>

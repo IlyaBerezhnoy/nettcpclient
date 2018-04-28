@@ -22,7 +22,7 @@ public class Tlv {
     }
     
     
-    public short getType() {
+    public Short getType() {
         return type;
     }
     

@@ -4,15 +4,11 @@ import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channel;
 import java.nio.channels.Selector;
-import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import static sun.misc.GThreadHelper.lock;
 import java.util.concurrent.locks.*;
 
 public class NetworkClientApiManager {
@@ -22,7 +18,7 @@ public class NetworkClientApiManager {
         private SocketChannel client;        
         private TlvBox tlvBox;
         
-        private Map<Long, List<Tlv>> packetPool = new HashMap<>();
+        private Map<Long, LinkedList<Tlv>> packetPool = new HashMap<>();
         private Long incomingReqId = null;
         private final Lock lock = new ReentrantLock(); 
         private final Condition getNewPacketCond = lock.newCondition();        
@@ -127,7 +123,7 @@ public class NetworkClientApiManager {
                 client.write(buffer);
                 buffer.clear();  
                 int readBytes = client.read(buffer);
-                List<Tlv> tlvArr = tlvBox.parse(buffer.array(), 0, readBytes);
+                LinkedList<Tlv> tlvArr = tlvBox.parse(buffer.array(), 0, readBytes);
                     
                 if( tlvArr.size() != 2 
                     || tlvArr.get(0).getType() != TlvType.REQUEST_ID.getVal()
@@ -155,20 +151,20 @@ public class NetworkClientApiManager {
         }
     }
     
-    private NetworkClientApiManager mInstance;
+    private static NetworkClientApiManager mInstance;
     private NetworkClientApi mClient;
         
-    public NetworkClientApiManager() {         
+    private NetworkClientApiManager() {         
     }
     
-    private NetworkClientApiManager getInstance(){
+    public static NetworkClientApiManager getInstance(){
         if(mInstance == null) {
             mInstance = new NetworkClientApiManager();
         }
         return mInstance;
     }
     
-    private NetworkClientApi getClient(String hostName, int portNumber) throws IOException {
+    public NetworkClientApi getClient(String hostName, int portNumber) throws IOException {
         
         if(mClient == null) {
             NetworkTCPClient tcpClient = new NetworkTCPClient();

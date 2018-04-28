@@ -15,6 +15,7 @@ public class TlvType {
     public static final TlvType REQUEST_ID = new TlvType((short)0xA000);
     public static final TlvType NET_TOKEN = new TlvType((short)0xA001);
     public static final TlvType OVERLAY_ID = new TlvType((short)0xA002);
+    public static final TlvType ERR_MSG = new TlvType((short)0xA0FF);
     
     private short _val;
     
@@ -25,4 +26,14 @@ public class TlvType {
     public short getVal() {
         return _val;
     }
+    
+//    @Override
+//    public boolean equals(Object o) {
+//        if (o instanceof TlvType) {
+//            return ((TlvType) o).getVal() == this._val;            
+//        } else if (o instanceof Long) {
+//            return ((Long) o).shortValue() == this._val;
+//        }
+//        return false;
+//    }
 }
