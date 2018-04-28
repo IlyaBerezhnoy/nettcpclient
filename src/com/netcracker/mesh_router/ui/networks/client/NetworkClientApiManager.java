@@ -22,18 +22,12 @@ public class NetworkClientApiManager {
         private SocketChannel client;        
         private TlvBox tlvBox;
         
-        private Map<Long, List<Tlv>> regPacketPool = new HashMap<>();
-        private Long incomingCreId = null;
+        private Map<Long, List<Tlv>> packetPool = new HashMap<>();
+        private Long incomingReqId = null;
         private final Lock lock = new ReentrantLock(); 
-        private final Condition getNewOverlayPacketCond = lock.newCondition();        
+        private final Condition getNewPacketCond = lock.newCondition();        
         //private final Object lock = new Object();
-                
-        private Map<Long, List<Tlv>> crePacketPool = new HashMap<>();
-        private Long incomingRegId = null;
-        private final Lock lock = new ReentrantLock(); 
-        private final Condition getNewOverlayPacketCond = lock.newCondition();        
-        
-        
+                  
         public NetworkTCPClient() throws IOException {
             tlvBox = new TlvBox();             
         }
@@ -54,38 +48,16 @@ public class NetworkClientApiManager {
         @Override
         public String createNetwork(String clientToken) throws IOException, IllegalArgumentException {
             
-            String response = null;
-            lock.lock();
-            try {                
-                if(clientToken != null) {
-
-                    List<Tlv> tlvPacket= new LinkedList<>();
-                    Long curReqId = Thread.currentThread().getId();
-                    tlvPacket.add(tlvBox.putLong2Tlv(TlvType.REQUEST_ID.getVal(), curReqId));
-                    tlvPacket.add(new Tlv(TlvType.NET_TOKEN, clientToken.getBytes()));
-
-                    ByteBuffer buffer = ByteBuffer.wrap(tlvBox.serialize(tlvPacket));
-                    int readBytes = sendBuffer(buffer);                
-                    List<Tlv> tlvArr = tlvBox.parse(buffer.array(), 0, readBytes);
-
-                    if( tlvArr.size() != 2 
-                            || tlvArr.get(0).getType() != TlvType.REQUEST_ID.getVal()
-                            || tlvArr.get(1).getType() != TlvType.OVERLAY_ID.getVal()
-                            )
-                        throw new IllegalArgumentException("type of data received does not correspond overlay id");                                           
-
-                    Long inReqId = tlvBox.getLongFromTlv(tlvArr.get(0));
-                    if(inReqId != curReqId) {                    
-                        packetPool.put(inReqId, tlvArr);
-                        tlvArr = null;
-                        incomingCreId = inReqId;
-                        getNewPacketCond.signalAll();
+            String response = null;                       
+            if(clientToken != null) {
+                try{
+                    List<Tlv> inArr = sendParam(new Tlv(TlvType.NET_TOKEN, clientToken.getBytes()));
+                    if(inArr != null){
+                        if(inArr.get(1).getType() != TlvType.OVERLAY_ID.getVal())
+                            throw new IllegalArgumentException("Type of received data does not correspond overlay id");
+                        
+                        response = new String(inArr.get(1).getValue()).trim();
                     }
-                    while(incomingCreId != curReqId) { 
-                        getNewPacketCond.await();
-                    }          
-                    tlvArr = packetPool.remove(curReqId);                                    
-                    response = new String(tlvArr.get(1).getValue()).trim();
                     /*
                     if(inReqId != curReqId) {
                         synchronized(lock){
@@ -111,12 +83,10 @@ public class NetworkClientApiManager {
                             Thread.currentThread().interrupt();
                         }
                     }
-                    */
-                }        
-            } catch(InterruptedException ex) {
-                Thread.currentThread().interrupt();
-            }finally {
-                lock.unlock();
+                    */                      
+                } catch(InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                }
             }
             return response;                            
         }
@@ -125,42 +95,64 @@ public class NetworkClientApiManager {
         public boolean registerNetwork(String overlayID) throws IOException, IllegalArgumentException {
             
             if(overlayID != null) {
+                try {
+
+                    List<Tlv> tlvArr = sendParam(new Tlv(TlvType.OVERLAY_ID, overlayID.getBytes()));
+                    if(tlvArr != null) {
+                        if(tlvArr.get(1).getLength() != Byte.BYTES 
+                                || tlvArr.get(0).getValue()[0] > 2)
+                            throw new IllegalArgumentException("Type of received data is invalid");
+
+                        byte param = tlvArr.get(0).getValue()[0]; 
+                        return (param == 1);
+                    }
                 
-                buffer = ByteBuffer.wrap(
-                        tlvBox.serialize(
-                                new Tlv(TlvType.OVERLAY_ID, overlayID.getBytes())
-                        )
-                );
-                int readBytes = sendBuffer(buffer);
-                
-                List<Tlv> tlvArr = tlvBox.parse(buffer.array(), 0, readBytes);
-                do { 
-                    if(tlvArr.size() == 0) break;      
-                    
-                    Tlv inTlv = tlvArr.get(0);                    
-                    if(inTlv.getLength() != Byte.BYTES) break;
-                    
-                    byte param = tlvArr.get(0).getValue()[0];
-                    if(param > 2)   break;
-                    
-                    return (param == 1);
-                    
-                } while(false);
-                
-                throw new IllegalArgumentException("type of data received is invalid");              
+                } catch(InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                }
             }
             return false;
         } 
         
-        private int sendBuffer(ByteBuffer buffer) throws IOException {
+        private List<Tlv> sendParam(Tlv tlvParam) throws IOException, IllegalArgumentException, InterruptedException {
         
-            client.write(buffer);
-            buffer.clear();            
-            return client.read(buffer);  
+            lock.lock();            
+            try{                
+                List<Tlv> tlvPacket= new LinkedList<>();
+                Long curReqId = Thread.currentThread().getId();
+                tlvPacket.add(tlvBox.putLong2Tlv(TlvType.REQUEST_ID.getVal(), curReqId));
+                tlvPacket.add(tlvParam);
+                    
+                ByteBuffer buffer = ByteBuffer.wrap( tlvBox.serialize(tlvPacket) );
+                client.write(buffer);
+                buffer.clear();  
+                int readBytes = client.read(buffer);
+                List<Tlv> tlvArr = tlvBox.parse(buffer.array(), 0, readBytes);
+                    
+                if( tlvArr.size() != 2 
+                    || tlvArr.get(0).getType() != TlvType.REQUEST_ID.getVal()
+                        )
+                    throw new IllegalArgumentException("Type of received data does not correspond request id");
+                    
+                    Long recReqId = tlvBox.getLongFromTlv(tlvArr.get(0));
+                    if(recReqId != curReqId) {                    
+                        packetPool.put(recReqId, tlvArr);
+                        tlvArr = null;
+                        incomingReqId = recReqId;
+                        getNewPacketCond.signalAll();
+                        
+                        while(incomingReqId != curReqId) { 
+                            getNewPacketCond.await();
+                        }  
+                    }                                                
+                    return packetPool.remove(curReqId);
+            } catch(InterruptedException ex) {
+                Thread.currentThread().interrupt();
+            } finally {
+                lock.unlock();
+            }
+            return null;  
         }
-        
-        
-        
     }
     
     private NetworkClientApiManager mInstance;
