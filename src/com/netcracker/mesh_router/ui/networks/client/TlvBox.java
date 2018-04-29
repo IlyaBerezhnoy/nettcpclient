@@ -15,7 +15,7 @@ public class TlvBox {
     public TlvBox() {        
     }
     
-    public LinkedList<Tlv> parse(byte[] buffer, int offset, int length) throws IllegalArgumentException {
+    public LinkedList<Tlv> parse(byte[] buffer, int offset, int length) {
         
         LinkedList<Tlv> mObjects = new LinkedList<>();
         
@@ -27,7 +27,7 @@ public class TlvBox {
             parsed += 2;
             byte[] value = new byte[size];
             System.arraycopy(buffer, offset+parsed, value, 0, size);
-            mObjects.push(new Tlv(type, value));
+            mObjects.add(new Tlv(type, value));
             parsed += size;
         }                
         return mObjects;
@@ -40,8 +40,8 @@ public class TlvBox {
         byte[] result = new byte[mTotalBytes];                
         for (Tlv tlv : tlvArr) {
             byte[] bytes = tlv.getValue();
-            byte[] type   = ByteBuffer.allocate(2).order(DEFAULT_BYTE_ORDER).putInt(tlv.getType()).array();
-            byte[] length = ByteBuffer.allocate(2).order(DEFAULT_BYTE_ORDER).putInt(tlv.getLength()).array();
+            byte[] type   = ByteBuffer.allocate(2).order(DEFAULT_BYTE_ORDER).putShort(tlv.getType()).array();
+            byte[] length = ByteBuffer.allocate(2).order(DEFAULT_BYTE_ORDER).putShort(tlv.getLength()).array();
             System.arraycopy(type, 0, result, offset, type.length);
             offset += 2;
             System.arraycopy(length, 0, result, offset, length.length);
@@ -64,9 +64,9 @@ public class TlvBox {
         return new Tlv(type, buffer);
     }
     
-    public long getLongFromTlv(Tlv tlv) throws IllegalArgumentException {        
+    public long getLongFromTlv(Tlv tlv) throws IllegalArgumentException {   
         if(tlv.getLength() != Long.BYTES)
-            throw new IllegalArgumentException("Tlv instance doesn't conatin long value!");
+            throw new IllegalArgumentException("Tlv instance doesn't contain long value!");
         return ByteBuffer.wrap(tlv.getValue(), 0, Long.BYTES).order(DEFAULT_BYTE_ORDER).getLong();
     }
 }

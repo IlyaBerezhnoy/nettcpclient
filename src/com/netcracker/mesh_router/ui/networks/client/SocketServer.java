@@ -73,21 +73,21 @@ public class SocketServer {
         try{
             LinkedList<Tlv> tlvArr = tlvBox.parse(buffer.array(), 0, cnt);
             Long reqId = tlvBox.getLongFromTlv(tlvArr.get(0));
-            Tlv tlvParam = tlvArr.get(1);
+            Tlv tlvParam = tlvArr.remove(1);
             if(tlvParam.getType() == TlvType.NET_TOKEN.getVal()) {
-                System.out.println("Get createNetwork request from "+reqId.toString()+" with token "+String.valueOf(tlvParam.getValue()));
-                tlvArr.remove(1);
-                tlvArr.add(new Tlv(TlvType.OVERLAY_ID, "NETWORK1_OVERLAY_ID".getBytes()));
-            } else if(tlvArr.get(1).getType() == TlvType.OVERLAY_ID.getVal()) {
-                System.out.println("Get registerNetwork request from "+reqId.toString()+" with overlayId "+String.valueOf(tlvParam.getValue()));
-                tlvArr.remove(1);
+                System.out.println("Get createNetwork request from "+reqId.toString()+" with token "+new String(tlvParam.getValue()));
+                tlvArr.add(new Tlv(TlvType.OVERLAY_ID, ("NETWORK_OVERLAY_ID"+reqId).getBytes()));
+            } else if(tlvParam.getType() == TlvType.OVERLAY_ID.getVal()) {
+                System.out.println("Get registerNetwork request from "+reqId.toString()+" with overlayId "+new String(tlvParam.getValue()));
                 byte[] response = {1};
                 tlvArr.add(new Tlv(TlvType.OVERLAY_ID, response));
             } else {
                 throw new Exception("Unknown tlv type: "+tlvArr.get(1).getType().toString());
             }
+            buffer.clear();
+            buffer.put(tlvBox.serialize(tlvArr));
             buffer.flip();
-            client.write(ByteBuffer.wrap(tlvBox.serialize(tlvArr)));
+            client.write(buffer);
             buffer.clear();
             
 //            if (new String(buffer.array()).trim().equals("GOOD BUY!")) {
@@ -96,6 +96,7 @@ public class SocketServer {
 //            }
         } catch (IllegalArgumentException ex) {
             System.out.println("Error duting parsing incoming message");
+            System.out.println(ex.getMessage());
         }
     }
 
@@ -113,7 +114,8 @@ public class SocketServer {
         serverSocket.bind(new InetSocketAddress(host, port));
         serverSocket.configureBlocking(false);
         serverSocket.register(selector, SelectionKey.OP_ACCEPT);
-        buffer = ByteBuffer.allocate(1024);        
+        buffer = ByteBuffer.allocate(1024);  
+        System.out.println("Server is run successfully.");
     }
     
     
