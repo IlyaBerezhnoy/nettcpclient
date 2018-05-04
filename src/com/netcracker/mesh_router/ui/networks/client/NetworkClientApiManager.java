@@ -114,7 +114,8 @@ public class NetworkClientApiManager {
         
         private List<Tlv> sendParam(Tlv tlvParam) throws IOException, IllegalArgumentException, InterruptedException {
         
-            lock.lock();            
+            lock.lock(); 
+            LinkedList<Tlv> response = null;
             try{ 
                 
                 List<Tlv> tlvPacket= new LinkedList<>();
@@ -146,9 +147,9 @@ public class NetworkClientApiManager {
                         while(incomingReqId != curReqId) { 
                             getNewPacketCond.await();
                         }  
-                        return packetPool.remove(curReqId);
+                        response = packetPool.remove(curReqId);
                     } else {
-                        return tlvArr;
+                        response = tlvArr;
                     }                                               
                     
             } catch(InterruptedException ex) {
@@ -156,7 +157,7 @@ public class NetworkClientApiManager {
             } finally {
                 lock.unlock();
             }
-            return null;  
+            return response;  
         }
     }
            
