@@ -25,8 +25,9 @@ public class NetworkTcpClient {
                 ServerRunner server = new ServerRunner(SocketServer.createServer(args[1], Integer.parseInt(args[2])));
                 new Thread(server).start();                
             } else if(args[0].equals("client")) {
-                for(int i=0;i<10;i++){
-                    ClientRunner client = new ClientRunner(NetworkClientApiManager.getInstance().getClient(args[1], Integer.parseInt(args[2])));
+                NetworkClientApiManager.getInstance().initClient(args[1], Integer.parseInt(args[2]));
+                for(int i=0;i<10;i++){                    
+                    ClientRunner client = new ClientRunner(NetworkClientApiManager.getInstance().getClient());
                     new Thread(client).start();                
                 }
             }

@@ -15,7 +15,7 @@ public class NetworkClientApiManager {
     
     private class NetworkTCPClient implements NetworkClientApi {
     
-        private SocketChannel client;        
+        private SocketChannel client = null;        
         private final TlvBox tlvBox = new TlvBox();
         
         ByteBuffer buffer = ByteBuffer.allocate(1024);
@@ -29,20 +29,20 @@ public class NetworkClientApiManager {
             
         }
         
-        public void start(String hostName, int portNumber) throws IOException {
+        public void connect(String hostName, int portNumber) throws IOException {
+            lock.lock(); 
              try {
+                 if(client != null && client.isConnected())
+                    client.close(); 
+                buffer.clear();
                 client = SocketChannel.open(new InetSocketAddress(hostName, portNumber));                
             } catch(IOException e) {
                 throw e;
+            } finally {
+                 lock.unlock(); 
             }
         }
-        
-        public void stop() throws IOException {
-            if(client != null && client.isConnected())
-                client.close(); 
-            buffer.clear();
-        }
-                        
+                                        
         @Override
         public String createNetwork(String clientToken) throws IOException, IllegalArgumentException {
             
@@ -159,9 +159,9 @@ public class NetworkClientApiManager {
             return null;  
         }
     }
-       
-    private static final Object lock = new Object();
+           
     private static NetworkClientApiManager mInstance;
+    private static final Object lock = new Object();
     private NetworkTCPClient mClient;
         
     private NetworkClientApiManager() {         
@@ -176,24 +176,24 @@ public class NetworkClientApiManager {
         return mInstance;
     }
     
-    public NetworkClientApi getClient(String hostName, int portNumber) throws IOException {
+    public NetworkClientApi getClient() {
         
-        synchronized(lock) {
-            if(mClient == null) {
-                NetworkTCPClient tcpClient = new NetworkTCPClient();
-                tcpClient.start(hostName, portNumber);
-                mClient = tcpClient;            
-            }
-        }
+//        synchronized(lock) {
+//            if(mClient == null)
+//                throw new RuntimeException("Network client is not initialized");
+//        }
         return mClient;
     }
     
-    public NetworkClientApi reconnectClient(String hostName, int portNumber) throws IOException {
+    public void initClient(String hostName, int portNumber) throws IOException {
         synchronized(lock) {
-            if(mClient != null)
-                mClient.stop();      
-            mClient.start(hostName, portNumber);
+            if(mClient == null) {
+                NetworkTCPClient tcpClient = new NetworkTCPClient();
+                tcpClient.connect(hostName, portNumber);
+                mClient = tcpClient; 
+            } else {                
+                mClient.connect(hostName, portNumber);
+            }          
         }
-        return mClient;
-    }
+    }    
 }
