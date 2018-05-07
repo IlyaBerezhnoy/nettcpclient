@@ -23,11 +23,13 @@ public class NetworkTcpClient {
             
             if(args[0].equals("server")) {
                 ServerRunner server = new ServerRunner(SocketServer.createServer(args[1], Integer.parseInt(args[2])));
-                new Thread(server).start();                
+                for(int i=0;i< Integer.parseInt(args[3]);i++){                     
+                    new Thread(server).start();                
+                }
             } else if(args[0].equals("client")) {
                 NetworkClientApiManager.getInstance().initClient(args[1], Integer.parseInt(args[2]));
-                for(int i=0;i<10;i++){                    
-                    ClientRunner client = new ClientRunner(NetworkClientApiManager.getInstance().getClient());
+                ClientRunner client = new ClientRunner(NetworkClientApiManager.getInstance().getClient());
+                for(int i=0;i<Integer.parseInt(args[3]);i++){                                        
                     new Thread(client).start();                
                 }
             }
@@ -66,7 +68,7 @@ class ClientRunner implements Runnable{
         try{
             String tokenID = client.createNetwork("NETWORK_TOKEN"+Thread.currentThread().getId());
             System.out.println(Thread.currentThread().getId()+". tokenID: "+tokenID);
-            Thread.sleep(0);
+            Thread.yield();
             boolean result = client.registerNetwork(tokenID);
             System.out.println(Thread.currentThread().getId()+". Registering is "+(result ? "successful" : "failed"));            
         } catch(Exception ex) {

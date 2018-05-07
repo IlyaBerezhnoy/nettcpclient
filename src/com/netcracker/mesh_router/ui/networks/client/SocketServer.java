@@ -53,10 +53,10 @@ public class SocketServer {
                 SelectionKey key = iter.next();
  
                 if (key.isAcceptable()) {
-                    register(selector, serverSocket);
+                    register(selector, serverSocket);                    
                 }
  
-                if (key.isReadable()) {
+                if (key.isReadable()) {                     
                     answer(buffer, key);
                 }
                 iter.remove();
@@ -67,10 +67,10 @@ public class SocketServer {
     private void answer(ByteBuffer buffer, SelectionKey key) 
             throws IOException, Exception {
         
-        SocketChannel client = (SocketChannel) key.channel();
+        SocketChannel client = (SocketChannel) key.channel();        
         int cnt = client.read(buffer);
         
-        try{
+        try{            
             LinkedList<Tlv> tlvArr = tlvBox.parse(buffer.array(), 0, cnt);
             Long reqId = tlvBox.getLongFromTlv(tlvArr.get(0));
             Tlv tlvParam = tlvArr.remove(1);
@@ -105,7 +105,7 @@ public class SocketServer {
 
         SocketChannel client = serverSocket.accept();
         client.configureBlocking(false);
-        client.register(selector, SelectionKey.OP_READ);
+        client.register(selector, SelectionKey.OP_READ);        
     }
     
     private void init(String host, int port) throws IOException {        
