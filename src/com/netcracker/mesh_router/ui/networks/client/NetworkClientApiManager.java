@@ -44,7 +44,7 @@ public class NetworkClientApiManager {
         }
                                         
         @Override
-        public String createNetwork(String clientToken) throws IOException, IllegalArgumentException {
+        public String createNetwork(String clientToken) throws IOException, IllegalArgumentException, InterruptedException {
             
             String response = null;                       
             if(clientToken != null) {
@@ -83,14 +83,14 @@ public class NetworkClientApiManager {
                     }
                     */                      
                 } catch(InterruptedException ex) {
-                    Thread.currentThread().interrupt();
+                    throw ex;
                 }
             }
             return response;                            
         }
     
         @Override
-        public boolean registerNetwork(String overlayID) throws IOException, IllegalArgumentException {
+        public boolean registerNetwork(String overlayID) throws IOException, IllegalArgumentException, InterruptedException {
             
             if(overlayID != null) {
                 try {
@@ -106,7 +106,7 @@ public class NetworkClientApiManager {
                     }
                 
                 } catch(InterruptedException ex) {
-                    Thread.currentThread().interrupt();
+                    throw ex;
                 }
             }
             return false;
@@ -153,7 +153,7 @@ public class NetworkClientApiManager {
                     }                                               
                     
             } catch(InterruptedException ex) {
-                Thread.currentThread().interrupt();
+                throw ex;
             } finally {
                 lock.unlock();
             }
