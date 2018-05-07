@@ -69,4 +69,48 @@ public class TlvBox {
             throw new IllegalArgumentException("Tlv instance doesn't contain long value!");
         return ByteBuffer.wrap(tlv.getValue(), 0, Long.BYTES).order(DEFAULT_BYTE_ORDER).getLong();
     }
+    
+    public Tlv putInt2Tlv(short type, int value) {        
+        byte[] buffer = ByteBuffer.allocate(Integer.BYTES).order(DEFAULT_BYTE_ORDER).putInt(value).array();
+        return new Tlv(type, buffer);
+    }
+    
+    public int getIntFromTlv(Tlv tlv) throws IllegalArgumentException {   
+        if(tlv.getLength() != Integer.BYTES)
+            throw new IllegalArgumentException("Tlv instance doesn't contain int value!");
+        return ByteBuffer.wrap(tlv.getValue(), 0, Integer.BYTES).order(DEFAULT_BYTE_ORDER).getInt();
+    }
+    
+    public Tlv putShort2Tlv(short type, short value) {        
+        byte[] buffer = ByteBuffer.allocate(Short.BYTES).order(DEFAULT_BYTE_ORDER).putShort(value).array();
+        return new Tlv(type, buffer);
+    }
+    
+    public short getShortFromTlv(Tlv tlv) throws IllegalArgumentException {   
+        if(tlv.getLength() != Short.BYTES)
+            throw new IllegalArgumentException("Tlv instance doesn't contain short value!");
+        return ByteBuffer.wrap(tlv.getValue(), 0, Short.BYTES).order(DEFAULT_BYTE_ORDER).getShort();
+    }
+    
+    public Tlv putByte2Tlv(short type, byte value) {        
+        byte[] buffer = ByteBuffer.allocate(Byte.BYTES).order(DEFAULT_BYTE_ORDER).put(value).array();
+        return new Tlv(type, buffer);
+    }
+    
+    public byte getByteFromTlv(Tlv tlv) throws IllegalArgumentException {   
+        if(tlv.getLength() != Byte.BYTES)
+            throw new IllegalArgumentException("Tlv instance doesn't contain byte value!");
+        return ByteBuffer.wrap(tlv.getValue(), 0, Byte.BYTES).order(DEFAULT_BYTE_ORDER).get();
+    }
+    
+    public Tlv putDouble2Tlv(short type, double value) {        
+        byte[] buffer = ByteBuffer.allocate(Double.BYTES).order(DEFAULT_BYTE_ORDER).putDouble(value).array();
+        return new Tlv(type, buffer);
+    }
+    
+    public double getDoubleFromTlv(Tlv tlv) throws IllegalArgumentException {   
+        if(tlv.getLength() != Double.BYTES)
+            throw new IllegalArgumentException("Tlv instance doesn't contain double value!");
+        return ByteBuffer.wrap(tlv.getValue(), 0, Double.BYTES).order(DEFAULT_BYTE_ORDER).get();
+    }
 }
