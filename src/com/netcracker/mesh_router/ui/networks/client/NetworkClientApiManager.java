@@ -18,9 +18,14 @@ public class NetworkClientApiManager {
         private SocketChannel client = null;        
         private final TlvBox tlvBox = new TlvBox();
         
-        ByteBuffer buffer = ByteBuffer.allocate(1024);
+        ThreadLocal<ByteBuffer> localBuffer = 
+                new ThreadLocal<ByteBuffer>()   {
+                    @Override 
+                    protected ByteBuffer initialValue() {
+                        return ByteBuffer.allocate(1024);
+                    }
+                };
         private Map<Long, LinkedList<Tlv>> packetPool = new HashMap<>();
-        //private Long incomingReqId = null;
         private final Lock lock = new ReentrantLock(); 
         private final Condition getNewPacketCond = lock.newCondition();        
                           
@@ -32,7 +37,7 @@ public class NetworkClientApiManager {
             try {
                 if(client != null && client.isConnected())
                     client.close(); 
-                buffer.clear();
+                localBuffer.get().clear();
                 client = SocketChannel.open(new InetSocketAddress(hostName, portNumber));                
             } finally {
                 lock.unlock(); 
@@ -79,14 +84,16 @@ public class NetworkClientApiManager {
             tlvPacket.add(tlvBox.putLong2Tlv(TlvType.REQUEST_ID.getVal(), curReqId));
             tlvPacket.add(tlvParam);
             
+            ByteBuffer buffer = localBuffer.get();
+            buffer.clear(); 
+            buffer.put( tlvBox.serialize(tlvPacket) );
+            buffer.flip();
+            
             lock.lock();             
             try{ 
-                buffer.clear(); 
-                buffer.put( tlvBox.serialize(tlvPacket) );
-                buffer.flip();
                 client.write(buffer);
-                buffer.clear();  
-                int readBytes = client.read(buffer);                
+                buffer.clear();
+                int readBytes = client.read(buffer);
                 LinkedList<Tlv> tlvArr = tlvBox.parse(buffer.array(), 0, readBytes);
                     
                 if( tlvArr.size() != 2 
@@ -97,11 +104,7 @@ public class NetworkClientApiManager {
                     Long recReqId = tlvBox.getLongFromTlv(tlvArr.get(0));                     
                     if(!recReqId.equals(curReqId)) {
                         packetPool.put(recReqId, tlvArr);
-                        //tlvArr = null;
-                        //incomingReqId = recReqId;
-                        getNewPacketCond.signalAll();
-                        
-                        //while(incomingReqId != curReqId) { 
+                        getNewPacketCond.signalAll();                        
                         while( !packetPool.containsKey(curReqId)) { 
                             getNewPacketCond.await();
                         }  
