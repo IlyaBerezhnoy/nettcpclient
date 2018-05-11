@@ -1,4 +1,4 @@
-package com.netcracker.mesh_router.ui.networks.client;
+package com.netcracker.mesh_router.ui.networks.client.tlv;
 
 import java.util.List;
 import java.util.zip.DataFormatException;

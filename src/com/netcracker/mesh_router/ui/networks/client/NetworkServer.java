@@ -1,8 +1,8 @@
 package com.netcracker.mesh_router.ui.networks.client;
 
-import com.netcracker.mesh_router.ui.networks.client.Tlv;
-import com.netcracker.mesh_router.ui.networks.client.TlvBox;
-import com.netcracker.mesh_router.ui.networks.client.TlvType;
+import com.netcracker.mesh_router.ui.networks.client.tlv.Tlv;
+import com.netcracker.mesh_router.ui.networks.client.tlv.TlvBox;
+import com.netcracker.mesh_router.ui.networks.client.tlv.TlvType;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -25,19 +25,19 @@ import java.util.Set;
  *
  * @author ilia-mint
  */
-public class SocketServer {
+public class NetworkServer {
       
     private TlvBox tlvBox = new TlvBox();
-    private static SocketServer mInst = null;
+    private static NetworkServer mInst = null;
     
-    private SocketServer(){} 
+    private NetworkServer(){} 
     private Selector selector;
     private ServerSocketChannel serverSocket;
     private ByteBuffer buffer;
     
-    public static SocketServer createServer(String host, int port) throws IOException {        
+    public static NetworkServer createServer(String host, int port) throws IOException {        
         if(mInst == null){
-            mInst = new SocketServer();
+            mInst = new NetworkServer();
             mInst.init(host, port);
         }
         return mInst;

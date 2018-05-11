@@ -1,5 +1,6 @@
-package com.netcracker.mesh_router.ui.networks.client;
+package com.netcracker.mesh_router.ui.networks.client.tlv;
 
+import com.netcracker.mesh_router.ui.networks.client.tlv.Tlv;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
