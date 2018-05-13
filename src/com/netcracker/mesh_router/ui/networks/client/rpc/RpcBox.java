@@ -21,7 +21,7 @@ public class RpcBox {
     
     public RpcBox(){}
     
-    public List<Rpc> parse(byte[] buffer, int offset, int length) {
+    public List<Rpc> parse(byte[] buffer, int offset, int length) throws IllegalArgumentException {
         
         List<Rpc> mObjects = new ArrayList<>();
         
@@ -33,7 +33,7 @@ public class RpcBox {
             parsed += Integer.BYTES;
             Pair<Integer, Object[]> params = parseParams(funcId, buffer, offset+parsed, length);
             parsed += params.getKey();
-            mObjects.add(new Rpc(funcId, reqId, params.getValue()));            
+            mObjects.add(new Rpc(RpcFuncEnum.valueOf(funcId), reqId, params.getValue()));            
         }                
         return mObjects;
     }
@@ -101,7 +101,7 @@ public class RpcBox {
         Object[] params = null;
         Integer size = 0;
         
-        switch(FuncEnum.valueOf(funcId)){
+        switch(RpcFuncEnum.valueOf(funcId)){
             case CreateNetwork: {
                 len = parseIntParam(buffer, pos, length);
                 pos += Integer.BYTES;

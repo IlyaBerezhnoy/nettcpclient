@@ -20,7 +20,7 @@ public class Rpc {
         this.params = (params != null) ? Arrays.copyOf(params, params.length) : null;
     }
     
-    public Rpc(FuncEnum funcId, int reqId, Object[] params) {
+    public Rpc(RpcFuncEnum funcId, int reqId, Object[] params) {
         this(funcId.getId(), reqId, params);
     }
     

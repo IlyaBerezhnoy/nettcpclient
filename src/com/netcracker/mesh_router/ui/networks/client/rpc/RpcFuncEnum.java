@@ -8,13 +8,13 @@ package com.netcracker.mesh_router.ui.networks.client.rpc;
 import java.util.HashMap;
 import java.util.Map;
 
-public enum FuncEnum {
+public enum RpcFuncEnum {
     
     CreateNetwork(1),
     RegisterNetwork(2),
     Exception(~0);
     
-    private static final Map<Integer, FuncEnum> funcMap;
+    private static final Map<Integer, RpcFuncEnum> funcMap;
     static{
         funcMap = new HashMap<>();
         funcMap.put(CreateNetwork.ordinal(), CreateNetwork);
@@ -22,13 +22,15 @@ public enum FuncEnum {
         funcMap.put(Exception.ordinal(), Exception);
     }
     
-    public static FuncEnum valueOf(final int val){
+    public static RpcFuncEnum valueOf(final int val) throws IllegalArgumentException {
+        if(!funcMap.containsKey(val))
+            throw new IllegalArgumentException("Value \""+val+"\" is illegal function id");
         return funcMap.get(val);
     }
     
     private final int id;
     
-    FuncEnum(int id) {
+    RpcFuncEnum(int id) {
         this.id = id;
     } 
     

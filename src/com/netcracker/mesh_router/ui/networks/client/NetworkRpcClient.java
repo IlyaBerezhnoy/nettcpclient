@@ -5,7 +5,7 @@
  */
 package com.netcracker.mesh_router.ui.networks.client;
 
-import com.netcracker.mesh_router.ui.networks.client.rpc.FuncEnum;
+import com.netcracker.mesh_router.ui.networks.client.rpc.RpcFuncEnum;
 import com.netcracker.mesh_router.ui.networks.client.rpc.Rpc;
 import com.netcracker.mesh_router.ui.networks.client.tlv.Tlv;
 import com.netcracker.mesh_router.ui.networks.client.tlv.TlvBox;
@@ -30,7 +30,7 @@ class NetworkRpcClient extends NetworkTcpClient{
             if(clientToken != null) {
                 Object[] params = new Object[1];
                 params[0] = clientToken;
-                Rpc resp = sendParam(new Rpc(FuncEnum.CreateNetwork, (int)Thread.currentThread().getId(), params));
+                Rpc resp = sendParam(new Rpc(RpcFuncEnum.CreateNetwork, (int)Thread.currentThread().getId(), params));
                 if(resp != null){
                     response = (String)resp.getParams()[0];
                 }
@@ -44,7 +44,7 @@ class NetworkRpcClient extends NetworkTcpClient{
             if(overlayID != null) {   
                 Object[] params = new Object[1];
                 params[0] = overlayID;
-                Rpc resp = sendParam(new Rpc(FuncEnum.RegisterNetwork , (int)Thread.currentThread().getId(), params));
+                Rpc resp = sendParam(new Rpc(RpcFuncEnum.RegisterNetwork , (int)Thread.currentThread().getId(), params));
                 if(resp != null) {                                        
                     return (Boolean)resp.getParams()[0];
                 }
@@ -54,8 +54,8 @@ class NetworkRpcClient extends NetworkTcpClient{
         
         private Rpc sendParam(Rpc request) throws IOException, IllegalArgumentException, InterruptedException {
                     
-            LinkedList<Tlv> response = null;
-            List<Tlv> tlvPacket= new LinkedList<>();
+            Rpc response = null;
+            List<Object> tlvPacket= new LinkedList<>();
             Long curReqId = Thread.currentThread().getId();
             tlvPacket.add(tlvBox.putLong2Tlv(TlvType.REQUEST_ID.getVal(), curReqId));
             tlvPacket.add(tlvParam);
