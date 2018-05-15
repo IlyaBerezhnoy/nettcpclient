@@ -44,6 +44,7 @@ public class RpcBox {
     public byte[] serialize(Rpc rpc) {
         
         int mTotalBytes = 0;
+        int mParamBytes = 0;
         
         byte[] funcId = ByteBuffer.allocate(Integer.BYTES).order(DEFAULT_BYTE_ORDER).putInt(rpc.getFuncId().getId()).array();
         mTotalBytes += funcId.length;
@@ -56,11 +57,12 @@ public class RpcBox {
             paramsArr = new byte[rpcParams.length][];
             for (int i=0; i< rpcParams.length; i++) {
                 paramsArr[i] = param2bytes(rpcParams[i]);                
-                mTotalBytes += paramsArr[i].length;                
+                mTotalBytes += paramsArr[i].length; 
+                mParamBytes += paramsArr[i].length; 
             }
         }
         
-        byte[] paramsSize = ByteBuffer.allocate(Integer.BYTES).order(DEFAULT_BYTE_ORDER).putInt(mTotalBytes).array();
+        byte[] paramsSize = ByteBuffer.allocate(Integer.BYTES).order(DEFAULT_BYTE_ORDER).putInt(mParamBytes).array();
         mTotalBytes += paramsSize.length;    
         
         byte[] result = new byte[mTotalBytes];  
