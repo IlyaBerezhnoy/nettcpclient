@@ -73,7 +73,8 @@ class ClientRunner implements Runnable{
             System.out.println("Thread "+Thread.currentThread().getId()+". tokenID: "+tokenID);
             Thread.yield();
             boolean result = client.registerNetwork(tokenID);
-            System.out.println("Thread "+Thread.currentThread().getId()+". Registering is "+(result ? "successful" : "failed"));            
+            System.out.println("Thread "+Thread.currentThread().getId()+". Registering is "+(result ? "successful" : "failed"));    
+           
         } catch(Exception ex) {
             System.out.println(ex.getMessage()); 
         }

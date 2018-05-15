@@ -23,7 +23,7 @@ public class ServerRpcBox extends RpcBox {
         switch(RpcFuncEnum.valueOf(funcId)) {
             case CreateNetwork:
             case RegisterNetwork: {
-                len = parseIntParam(buffer, pos, length);                
+                len = parseIntParam(buffer, pos);                
                 pos += Integer.BYTES;
                 size += Integer.BYTES;                
                 params = new Object[1];

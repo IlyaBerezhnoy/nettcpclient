@@ -27,16 +27,16 @@ public class RpcBox {
         
         int parsed = 0;
         while (parsed < length) {
-            Integer funcId = parseIntParam(buffer, offset + parsed, Integer.BYTES);            
-            parsed += Integer.BYTES;            
-            Integer reqId = parseIntParam(buffer, offset + parsed, Integer.BYTES);
+            Integer funcId = parseIntParam(buffer, offset + parsed);
             parsed += Integer.BYTES;
-            final Integer size = parseIntParam(buffer, offset + parsed, Integer.BYTES);
+            Integer reqId = parseIntParam(buffer, offset + parsed);
+            parsed += Integer.BYTES;
+            final Integer size = parseIntParam(buffer, offset + parsed);
             parsed += Integer.BYTES;
             Pair<Integer, Object[]> params = parseParams(funcId, buffer, offset+parsed, length);
             parsed += params.getKey();
-            mObjects.add(new Rpc(RpcFuncEnum.valueOf(funcId), reqId, params.getValue()));              
-        }                       
+            mObjects.add(new Rpc(RpcFuncEnum.valueOf(funcId), reqId, params.getValue()));
+        }
       
         return mObjects;
     }
@@ -49,23 +49,23 @@ public class RpcBox {
         byte[] funcId = ByteBuffer.allocate(Integer.BYTES).order(DEFAULT_BYTE_ORDER).putInt(rpc.getFuncId().getId()).array();
         mTotalBytes += funcId.length;
         byte[] reqId = ByteBuffer.allocate(Integer.BYTES).order(DEFAULT_BYTE_ORDER).putInt(rpc.getReqId()).array();
-        mTotalBytes += reqId.length;    
+        mTotalBytes += reqId.length;
         
         byte[][] paramsArr = null;
         Object[] rpcParams = rpc.getParams();
-        if(rpc.getParams() != null) {            
+        if(rpc.getParams() != null) {
             paramsArr = new byte[rpcParams.length][];
             for (int i=0; i< rpcParams.length; i++) {
-                paramsArr[i] = param2bytes(rpcParams[i]);                
-                mTotalBytes += paramsArr[i].length; 
-                mParamBytes += paramsArr[i].length; 
+                paramsArr[i] = param2bytes(rpcParams[i]);
+                mTotalBytes += paramsArr[i].length;
+                mParamBytes += paramsArr[i].length;
             }
         }
         
         byte[] paramsSize = ByteBuffer.allocate(Integer.BYTES).order(DEFAULT_BYTE_ORDER).putInt(mParamBytes).array();
-        mTotalBytes += paramsSize.length;    
+        mTotalBytes += paramsSize.length;
         
-        byte[] result = new byte[mTotalBytes];  
+        byte[] result = new byte[mTotalBytes];
         int offset = 0;
         System.arraycopy(funcId, 0, result, offset, funcId.length);
         offset += funcId.length;
@@ -95,8 +95,8 @@ public class RpcBox {
             return ByteBuffer.allocate(Integer.BYTES).order(DEFAULT_BYTE_ORDER).putInt((Integer)param).array();
         } else if(param instanceof Long) {
             return ByteBuffer.allocate(Long.BYTES).order(DEFAULT_BYTE_ORDER).putLong((Long)param).array();
-        } else if(param instanceof String) {            
-            String str = (String)param;            
+        } else if(param instanceof String) {
+            String str = (String)param;
             return ByteBuffer.allocate(str.getBytes().length+Integer.BYTES).order(DEFAULT_BYTE_ORDER)
                     .putInt(str.getBytes().length)
                     .put(str.getBytes()).array();
@@ -107,23 +107,23 @@ public class RpcBox {
     
     protected Pair<Integer, Object[]> parseParams(Integer funcId, byte[] buffer, int pos, final int length) throws IllegalArgumentException, RuntimeException {
         
-        int len = 0;        
+        int strBufSize = 0;
         Object[] params = null;
         Integer size = 0;
         
         switch(RpcFuncEnum.valueOf(funcId)) {
             case CreateNetwork: {
-                len = parseIntParam(buffer, pos, length);                
+                strBufSize = parseIntParam(buffer, pos);
                 pos += Integer.BYTES;
-                size += Integer.BYTES;                
+                size += Integer.BYTES;
                 params = new Object[1];
-                params[0] = parseStringParam(buffer, pos, len);
-                pos += len;
-                size += len;
+                params[0] = parseStringParam(buffer, pos, strBufSize);
+                pos += strBufSize;
+                size += strBufSize;
                 break;
             }
             case RegisterNetwork: {
-                Byte result = parseByteParam(buffer, pos, length);
+                Byte result = parseByteParam(buffer, pos);
                 params = new Object[1];
                 params[0] = (result==1);
                 pos += Byte.BYTES;
@@ -131,13 +131,13 @@ public class RpcBox {
                 break;
             }
             case Exception: {
-                len = parseIntParam(buffer, pos, length);
+                strBufSize = parseIntParam(buffer, pos);
                 pos += Integer.BYTES;
-                size += Integer.BYTES;                
+                size += Integer.BYTES;
                 params = new Object[1];
-                params[0] = parseStringParam(buffer, pos, length);
-                pos += len;
-                size += len;
+                params[0] = parseStringParam(buffer, pos, strBufSize);
+                pos += strBufSize;
+                size += strBufSize;
                 break;
             }
             default:
@@ -150,10 +150,10 @@ public class RpcBox {
     protected String parseStringParam(byte[] buffer, int pos, final int length) {
         return new String(buffer, pos, length);
     }
-    protected int parseIntParam(byte[] buffer, int pos, final int length){
+    protected int parseIntParam(byte[] buffer, int pos){
         return ByteBuffer.wrap(buffer, pos, Integer.BYTES).order(DEFAULT_BYTE_ORDER).getInt();
     }
-    protected byte parseByteParam(byte[] buffer, int pos, final int length){
+    protected byte parseByteParam(byte[] buffer, int pos){
         return ByteBuffer.wrap(buffer, pos, Byte.BYTES).order(DEFAULT_BYTE_ORDER).get();
     }
 }

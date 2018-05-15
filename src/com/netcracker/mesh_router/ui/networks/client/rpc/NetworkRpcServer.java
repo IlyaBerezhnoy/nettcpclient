@@ -80,16 +80,22 @@ public class NetworkRpcServer {
                     switch(funcId) {
                         case CreateNetwork: {
                             System.out.println("Get createNetwork request #"+reqId+" with token "+rpcReq.getParams()[0]);
-                            rpcResponse = new Rpc(funcId, reqId, new Object[]{("NETWORK_OVERLAY_ID"+reqId)});                            
+                            if(Math.random() > 0.5f)
+                                rpcResponse = new Rpc(funcId, reqId, new Object[]{("NETWORK_OVERLAY_ID"+reqId)});                            
+                            else
+                                rpcResponse = new Rpc(RpcFuncEnum.Exception, reqId, new Object[]{("SERVER RANDOM EXCEPTION FOR "+reqId)});                            
                             break;
                         }
                         case RegisterNetwork: {
                             System.out.println("Get registerNetwork request #"+reqId+" with overlayId "+rpcReq.getParams()[0]);
-                            rpcResponse = new Rpc(funcId, reqId, new Object[]{(byte)(reqId%2)}); 
+                            if(Math.random() > 0.5f)
+                                rpcResponse = new Rpc(funcId, reqId, new Object[]{(byte)(reqId%2)});
+                            else
+                                rpcResponse = new Rpc(RpcFuncEnum.Exception, reqId, new Object[]{("SERVER RANDOM EXCEPTION FOR "+reqId)});                                                        
                             break;
                         }
                         default:
-                            throw new RuntimeException("RPC serialization failed: unknown function ID");
+                            rpcResponse = new Rpc(RpcFuncEnum.Exception, reqId, new Object[]{("SERVER EXCEPTION: unknown function ID")});
                     }                    
                     buffer.clear();
                     buffer.put(rpcBox.serialize(rpcResponse));

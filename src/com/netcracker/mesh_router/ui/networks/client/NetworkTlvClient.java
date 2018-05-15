@@ -5,6 +5,7 @@
  */
 package com.netcracker.mesh_router.ui.networks.client;
 
+import com.netcracker.mesh_router.ui.networks.client.rpc.Rpc;
 import com.netcracker.mesh_router.ui.networks.client.tlv.Tlv;
 import com.netcracker.mesh_router.ui.networks.client.tlv.TlvBox;
 import com.netcracker.mesh_router.ui.networks.client.tlv.TlvType;
@@ -24,7 +25,7 @@ class NetworkTlvClient extends NetworkTcpClient {
     private Map<Long, LinkedList<Tlv>> packetPool = new HashMap<>();
                                         
     @Override
-    public String createNetwork(String clientToken) throws IOException, IllegalArgumentException, InterruptedException {
+    public String createNetwork(String clientToken) throws Exception {
             
             String response = null;                       
             if(clientToken != null) {               
@@ -38,8 +39,8 @@ class NetworkTlvClient extends NetworkTcpClient {
             return response;                            
         }
     
-        @Override
-        public boolean registerNetwork(String overlayID) throws IOException, IllegalArgumentException, InterruptedException {
+    @Override
+    public boolean registerNetwork(String overlayID) throws Exception {
             
             if(overlayID != null) {               
                 List<Tlv> tlvArr = sendParam(new Tlv(TlvType.OVERLAY_ID, overlayID.getBytes()));
@@ -53,9 +54,9 @@ class NetworkTlvClient extends NetworkTcpClient {
                 }
             }
             return false;
-        } 
+    } 
         
-        private List<Tlv> sendParam(Tlv tlvParam) throws IOException, IllegalArgumentException, InterruptedException {
+    private List<Tlv> sendParam(Tlv tlvParam) throws IOException, IllegalArgumentException, InterruptedException {
                     
             LinkedList<Tlv> response = null;
             List<Tlv> tlvPacket= new LinkedList<>();
@@ -72,30 +73,44 @@ class NetworkTlvClient extends NetworkTcpClient {
             try{ 
                 channel.write(buffer);
                 buffer.clear();
-                int readBytes = channel.read(buffer);
-                LinkedList<Tlv> tlvArr = tlvBox.parse(buffer.array(), 0, readBytes);
-                    
-                if( tlvArr.size() != 2 
-                    || tlvArr.get(0).getType() != TlvType.REQUEST_ID.getVal()
-                        )
-                    throw new IllegalArgumentException("Type of received data does not correspond request id");
-                    
-                    Long recReqId = tlvBox.getLongFromTlv(tlvArr.get(0));                     
-                    if(!recReqId.equals(curReqId)) {
-                        packetPool.put(recReqId, tlvArr);
-                        getNewPacketCond.signalAll();                        
-                        while( !packetPool.containsKey(curReqId)) { 
-                            getNewPacketCond.await();
-                        }  
-                        response = packetPool.remove(curReqId);
-                    } else {
-                        response = tlvArr;
-                    }                                               
+                while( !packetPool.containsKey(curReqId)) {
+                    getNewPacketCond.await();
+                }
+                response = packetPool.remove(curReqId);            
+//                int readBytes = channel.read(buffer);
+//                LinkedList<Tlv> tlvArr = tlvBox.parse(buffer.array(), 0, readBytes);
+//                    
+//                if( tlvArr.size() != 2 
+//                    || tlvArr.get(0).getType() != TlvType.REQUEST_ID.getVal()
+//                        )
+//                    throw new IllegalArgumentException("Type of received data does not correspond request id");
+//                    
+//                    Long recReqId = tlvBox.getLongFromTlv(tlvArr.get(0));
+//                    if(!recReqId.equals(curReqId)) {
+//                        packetPool.put(recReqId, tlvArr);
+//                        getNewPacketCond.signalAll();                        
+//                        while( !packetPool.containsKey(curReqId)) { 
+//                            getNewPacketCond.await();
+//                        }  
+//                        response = packetPool.remove(curReqId);
+//                    } else {
+//                        response = tlvArr;
+//                    }                                               
                     
             } finally {
                 lock.unlock();
             }
             return response;  
+    }
+    
+    @Override
+    protected void parsePacketImpl(final ByteBuffer buffer, int position, final int length) {
+        
+        final LinkedList<Tlv> tlvArr = tlvBox.parse(buffer.array(), position, length);
+        if(tlvArr.size() > 0) {
+            Long recReqId = tlvBox.getLongFromTlv(tlvArr.get(0));
+            packetPool.put(recReqId, tlvArr);
         }
+    }
     
 }
