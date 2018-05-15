@@ -3,12 +3,21 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/home/ilia/projects/tcpclient/src/com/netcracker/mesh_router/ui/networks/client/rpc/RpcBox.java</file>
-            <file>file:/home/ilia/projects/tcpclient/src/com/netcracker/mesh_router/ui/networks/client/NetworkClientApiManager.java</file>
-            <file>file:/home/ilia/projects/tcpclient/src/com/netcracker/mesh_router/ui/networks/client/NetworkClientApi.java</file>
-            <file>file:/home/ilia/projects/tcpclient/src/com/netcracker/mesh_router/ui/networks/client/NetworkTcpClient.java</file>
-            <file>file:/home/ilia/projects/tcpclient/src/com/netcracker/mesh_router/ui/networks/client/rpc/Rpc.java</file>
-            <file>file:/home/ilia/projects/tcpclient/src/com/netcracker/mesh_router/ui/networks/client/rpc/FuncEnum.java</file>
+            <file>file:/home/ilia-mint/projects/NetworkTcpClient/src/com/netcracker/mesh_router/ui/networks/client/NetworkClientApiManager.java</file>
+            <file>file:/home/ilia-mint/projects/NetworkTcpClient/src/com/netcracker/mesh_router/ui/networks/client/NetworkRegistrationService.java</file>
+            <file>file:/home/ilia-mint/projects/NetworkTcpClient/src/com/netcracker/mesh_router/ui/networks/client/tlv/NetworkTlvServer.java</file>
+            <file>file:/home/ilia-mint/projects/NetworkTcpClient/src/com/netcracker/mesh_router/ui/networks/client/NetworkClientApi.java</file>
+            <file>file:/home/ilia-mint/projects/NetworkTcpClient/src/com/netcracker/mesh_router/ui/networks/client/tlv/Tlv.java</file>
+            <file>file:/home/ilia-mint/projects/NetworkTcpClient/src/com/netcracker/mesh_router/ui/networks/client/NetworkRpcClient.java</file>
+            <file>file:/home/ilia-mint/projects/NetworkTcpClient/src/com/netcracker/mesh_router/ui/networks/client/tlv/TlvType.java</file>
+            <file>file:/home/ilia-mint/projects/NetworkTcpClient/src/com/netcracker/mesh_router/ui/networks/client/NetworkTlvClient.java</file>
+            <file>file:/home/ilia-mint/projects/NetworkTcpClient/src/com/netcracker/mesh_router/ui/networks/client/rpc/RpcFuncEnum.java</file>
+            <file>file:/home/ilia-mint/projects/NetworkTcpClient/src/com/netcracker/mesh_router/ui/networks/client/rpc/Rpc.java</file>
+            <file>file:/home/ilia-mint/projects/NetworkTcpClient/src/com/netcracker/mesh_router/ui/networks/client/rpc/ServerRpcBox.java</file>
+            <file>file:/home/ilia-mint/projects/NetworkTcpClient/src/com/netcracker/mesh_router/ui/networks/client/NetworkTcpClient.java</file>
+            <file>file:/home/ilia-mint/projects/NetworkTcpClient/src/com/netcracker/mesh_router/ui/networks/client/rpc/RpcBox.java</file>
+            <file>file:/home/ilia-mint/projects/NetworkTcpClient/src/com/netcracker/mesh_router/ui/networks/client/rpc/NetworkRpcServer.java</file>
+            <file>file:/home/ilia-mint/projects/NetworkTcpClient/src/com/netcracker/mesh_router/ui/networks/client/tlv/TlvBox.java</file>
         </group>
     </open-files>
 </project-private>

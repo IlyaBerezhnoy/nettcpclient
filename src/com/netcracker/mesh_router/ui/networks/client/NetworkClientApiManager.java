@@ -32,24 +32,39 @@ public class NetworkClientApiManager {
         return mInstance;
     }
     
-    public NetworkClientApi getClient() {
+    public NetworkClientApi getClient() {        
+        synchronized(lock) {
+            if(mClient == null)
+                throw new RuntimeException("Network channel is not initialized");
+            return mClient;
+        }
         
-//        synchronized(lock) {
-//            if(mClient == null)
-//                throw new RuntimeException("Network channel is not initialized");
-//        }
-        return mClient;
     }
     
     public void initClient(String hostName, int portNumber) throws IOException {
         synchronized(lock) {
             if(mClient == null) {
-                NetworkTcpClient tcpClient = new NetworkTlvClient();
+                NetworkTcpClient tcpClient = new NetworkRpcClient();
                 tcpClient.connect(hostName, portNumber);
                 mClient = tcpClient; 
             } else {                
                 mClient.connect(hostName, portNumber);
             }          
         }
-    }    
+    }  
+    
+    public void closeClient() {
+        synchronized(lock) {
+            try{
+                if(mClient != null) 
+                    mClient.close();
+            } catch(Exception ex){}        
+        }
+    }
+    
+    public boolean isClientConnected() {
+        synchronized(lock) {
+            return (mClient != null) && (mClient.isConnected());
+        }
+    }
 }

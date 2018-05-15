@@ -5,6 +5,9 @@
  */
 package com.netcracker.mesh_router.ui.networks.client;
 
+import com.netcracker.mesh_router.ui.networks.client.rpc.NetworkRpcServer;
+import com.netcracker.mesh_router.ui.networks.client.tlv.NetworkTlvServer;
+
 /**
  *
  * @author ilia-mint
@@ -22,7 +25,7 @@ public class NetworkRegistrationService {
                 throw new Exception("wrong number of arguments");
             
             if(args[0].equals("server")) {
-                ServerRunner server = new ServerRunner(NetworkServer.createServer(args[1], Integer.parseInt(args[2])));
+                ServerRunner server = new ServerRunner(NetworkRpcServer.createServer(args[1], Integer.parseInt(args[2])));
                 for(int i=0;i< Integer.parseInt(args[3]);i++){                     
                     new Thread(server).start();                
                 }
@@ -43,8 +46,8 @@ public class NetworkRegistrationService {
 
 class ServerRunner implements Runnable{
       
-    NetworkServer server;
-    ServerRunner(NetworkServer server){
+    NetworkRpcServer server;
+    ServerRunner(NetworkRpcServer server){
        this.server=server; 
     }
     
@@ -67,12 +70,12 @@ class ClientRunner implements Runnable{
     public void run() {
         try{
             String tokenID = client.createNetwork("NETWORK_TOKEN"+Thread.currentThread().getId());
-            System.out.println(Thread.currentThread().getId()+". tokenID: "+tokenID);
+            System.out.println("Thread "+Thread.currentThread().getId()+". tokenID: "+tokenID);
             Thread.yield();
             boolean result = client.registerNetwork(tokenID);
-            System.out.println(Thread.currentThread().getId()+". Registering is "+(result ? "successful" : "failed"));            
+            System.out.println("Thread "+Thread.currentThread().getId()+". Registering is "+(result ? "successful" : "failed"));            
         } catch(Exception ex) {
-            System.out.print(ex.getMessage()); 
+            System.out.println(ex.getMessage()); 
         }
     }
 }

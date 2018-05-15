@@ -1,8 +1,5 @@
-package com.netcracker.mesh_router.ui.networks.client;
+package com.netcracker.mesh_router.ui.networks.client.tlv;
 
-import com.netcracker.mesh_router.ui.networks.client.tlv.Tlv;
-import com.netcracker.mesh_router.ui.networks.client.tlv.TlvBox;
-import com.netcracker.mesh_router.ui.networks.client.tlv.TlvType;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -12,32 +9,21 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/**
- *
- * @author ilia-mint
- */
-public class NetworkServer {
+public class NetworkTlvServer {
       
     private TlvBox tlvBox = new TlvBox();
-    private static NetworkServer mInst = null;
+    private static NetworkTlvServer mInst = null;
     
-    private NetworkServer(){} 
+    private NetworkTlvServer(){} 
     private Selector selector;
     private ServerSocketChannel serverSocket;
     private ByteBuffer buffer;
     
-    public static NetworkServer createServer(String host, int port) throws IOException {        
+    public static NetworkTlvServer createServer(String host, int port) throws IOException {        
         if(mInst == null){
-            mInst = new NetworkServer();
+            mInst = new NetworkTlvServer();
             mInst.init(host, port);
         }
         return mInst;

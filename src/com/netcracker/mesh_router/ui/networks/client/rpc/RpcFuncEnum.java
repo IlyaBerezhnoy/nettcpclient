@@ -17,9 +17,9 @@ public enum RpcFuncEnum {
     private static final Map<Integer, RpcFuncEnum> funcMap;
     static{
         funcMap = new HashMap<>();
-        funcMap.put(CreateNetwork.ordinal(), CreateNetwork);
-        funcMap.put(RegisterNetwork.ordinal(), RegisterNetwork);
-        funcMap.put(Exception.ordinal(), Exception);
+        funcMap.put(CreateNetwork.getId(), CreateNetwork);
+        funcMap.put(RegisterNetwork.getId(), RegisterNetwork);
+        funcMap.put(Exception.getId(), Exception);
     }
     
     public static RpcFuncEnum valueOf(final int val) throws IllegalArgumentException {

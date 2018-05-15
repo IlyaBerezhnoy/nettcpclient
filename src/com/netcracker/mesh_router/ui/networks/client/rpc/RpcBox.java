@@ -27,14 +27,17 @@ public class RpcBox {
         
         int parsed = 0;
         while (parsed < length) {
-            Integer funcId = ByteBuffer.wrap(buffer, offset + parsed, Integer.BYTES).order(DEFAULT_BYTE_ORDER).getInt();
+            Integer funcId = parseIntParam(buffer, offset + parsed, Integer.BYTES);            
+            parsed += Integer.BYTES;            
+            Integer reqId = parseIntParam(buffer, offset + parsed, Integer.BYTES);
             parsed += Integer.BYTES;
-            Integer reqId = ByteBuffer.wrap(buffer,offset + parsed, Integer.BYTES).order(DEFAULT_BYTE_ORDER).getInt();
+            final Integer size = parseIntParam(buffer, offset + parsed, Integer.BYTES);
             parsed += Integer.BYTES;
             Pair<Integer, Object[]> params = parseParams(funcId, buffer, offset+parsed, length);
             parsed += params.getKey();
-            mObjects.add(new Rpc(RpcFuncEnum.valueOf(funcId), reqId, params.getValue()));            
-        }                
+            mObjects.add(new Rpc(RpcFuncEnum.valueOf(funcId), reqId, params.getValue()));              
+        }                       
+      
         return mObjects;
     }
     
@@ -42,9 +45,9 @@ public class RpcBox {
         
         int mTotalBytes = 0;
         
-        byte[] funcId = ByteBuffer.allocate(4).order(DEFAULT_BYTE_ORDER).putInt(rpc.getFuncId()).array();
+        byte[] funcId = ByteBuffer.allocate(Integer.BYTES).order(DEFAULT_BYTE_ORDER).putInt(rpc.getFuncId().getId()).array();
         mTotalBytes += funcId.length;
-        byte[] reqId = ByteBuffer.allocate(4).order(DEFAULT_BYTE_ORDER).putInt(rpc.getReqId()).array();
+        byte[] reqId = ByteBuffer.allocate(Integer.BYTES).order(DEFAULT_BYTE_ORDER).putInt(rpc.getReqId()).array();
         mTotalBytes += reqId.length;    
         
         byte[][] paramsArr = null;
@@ -57,12 +60,17 @@ public class RpcBox {
             }
         }
         
+        byte[] paramsSize = ByteBuffer.allocate(Integer.BYTES).order(DEFAULT_BYTE_ORDER).putInt(mTotalBytes).array();
+        mTotalBytes += paramsSize.length;    
+        
         byte[] result = new byte[mTotalBytes];  
         int offset = 0;
         System.arraycopy(funcId, 0, result, offset, funcId.length);
         offset += funcId.length;
         System.arraycopy(reqId, 0, result, offset, reqId.length);
         offset += reqId.length;
+        System.arraycopy(paramsSize, 0, result, offset, paramsSize.length);
+        offset += paramsSize.length;
         
         if(paramsArr != null) {
             for (int i=0; i< paramsArr.length; i++) {
@@ -95,19 +103,19 @@ public class RpcBox {
         }
     }
     
-    private Pair<Integer, Object[]> parseParams(Integer funcId, byte[] buffer, int pos, final int length) throws IllegalArgumentException, RuntimeException {
+    protected Pair<Integer, Object[]> parseParams(Integer funcId, byte[] buffer, int pos, final int length) throws IllegalArgumentException, RuntimeException {
         
         int len = 0;        
         Object[] params = null;
         Integer size = 0;
         
-        switch(RpcFuncEnum.valueOf(funcId)){
+        switch(RpcFuncEnum.valueOf(funcId)) {
             case CreateNetwork: {
-                len = parseIntParam(buffer, pos, length);
+                len = parseIntParam(buffer, pos, length);                
                 pos += Integer.BYTES;
                 size += Integer.BYTES;                
                 params = new Object[1];
-                params[0] = parseStringParam(buffer, pos, length);
+                params[0] = parseStringParam(buffer, pos, len);
                 pos += len;
                 size += len;
                 break;
@@ -137,15 +145,13 @@ public class RpcBox {
         return new Pair<>(size, params);
     }
     
-    private String parseStringParam(byte[] buffer, int pos, final int length) {
-        final int size = ByteBuffer.wrap(buffer, pos, Integer.BYTES).order(DEFAULT_BYTE_ORDER).getInt();
-        pos += Integer.BYTES;
-        return new String(buffer, pos, size);
+    protected String parseStringParam(byte[] buffer, int pos, final int length) {
+        return new String(buffer, pos, length);
     }
-    private int parseIntParam(byte[] buffer, int pos, final int length){
-        return ByteBuffer.wrap(buffer, pos, Byte.BYTES).order(DEFAULT_BYTE_ORDER).getInt();
+    protected int parseIntParam(byte[] buffer, int pos, final int length){
+        return ByteBuffer.wrap(buffer, pos, Integer.BYTES).order(DEFAULT_BYTE_ORDER).getInt();
     }
-    private byte parseByteParam(byte[] buffer, int pos, final int length){
+    protected byte parseByteParam(byte[] buffer, int pos, final int length){
         return ByteBuffer.wrap(buffer, pos, Byte.BYTES).order(DEFAULT_BYTE_ORDER).get();
     }
 }
