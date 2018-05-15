@@ -42,8 +42,8 @@ abstract class NetworkTcpClient implements NetworkClientApi {
         public void connect(String hostName, int portNumber) throws IOException {
             lock.lock(); 
             try {  
-                if(thread.isAlive())
-                    thread.interrupt();
+                //if(thread.isAlive())
+                 //   thread.interrupt();
                 //TODO wait  until thread has stopped
                 if(selector == null)
                     selector = Selector.open();
@@ -56,7 +56,8 @@ abstract class NetworkTcpClient implements NetworkClientApi {
                     channel.close();
                 
                 channel = newChannel;                
-                                
+                 
+                //thread.interrupted();
                 thread.start(); 
                
             } finally {
@@ -96,9 +97,10 @@ abstract class NetworkTcpClient implements NetworkClientApi {
                 
                 while (true) {
                     
-                    while(Thread.currentThread().isInterrupted()) {
-                        Thread.yield();
-                    }
+                   // while(Thread.currentThread().isInterrupted()) {
+                        //System.out.println("wait");
+                    //    Thread.yield();
+                   // }
                     
                     try {
                         selector.select();
