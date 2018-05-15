@@ -20,16 +20,14 @@ public class NetworkClientApiManager {
     private static final Object lock = new Object();
     private NetworkTcpClient mClient;
         
-    private NetworkClientApiManager() {         
+    private NetworkClientApiManager() {}
+    
+    private static class NetworkClientApiManagerHolder {
+        public static final NetworkClientApiManager holderInst = new NetworkClientApiManager();
     }
     
     public static NetworkClientApiManager getInstance(){
-        synchronized(lock){
-            if(mInstance == null) {
-                mInstance = new NetworkClientApiManager();          
-            }
-        }
-        return mInstance;
+        return NetworkClientApiManagerHolder.holderInst;
     }
     
     public NetworkClientApi getClient() {        
