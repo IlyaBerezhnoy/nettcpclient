@@ -37,7 +37,7 @@ public class NetworkRpcServer {
     }
     
     public void Run() throws Exception {
-        while (true) {            
+        while (true) {  
             selector.select();
             Set<SelectionKey> selectedKeys = selector.selectedKeys();
             Iterator<SelectionKey> iter = selectedKeys.iterator();

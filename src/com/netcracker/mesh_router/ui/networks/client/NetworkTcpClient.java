@@ -6,7 +6,6 @@
 package com.netcracker.mesh_router.ui.networks.client;
 
 import java.io.IOException;
-import static java.lang.Thread.MAX_PRIORITY;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
@@ -21,7 +20,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 abstract class NetworkTcpClient implements NetworkClientApi {
     
-        private volatile PacketHandlerThread thread = new PacketHandlerThread();
+        private volatile PacketHandlerThread thread = null;
         private volatile Selector selector = null;
         protected volatile SocketChannel channel = null;
         protected ThreadLocal<ByteBuffer> localBuffer = 
@@ -35,42 +34,48 @@ abstract class NetworkTcpClient implements NetworkClientApi {
         protected final Condition getNewPacketCond = lock.newCondition(); 
         private volatile AtomicInteger requestID = new AtomicInteger(0);
         
-        public NetworkTcpClient() {
-            thread.setDaemon(true);
+        public NetworkTcpClient() {            
         }
         
         public void connect(String hostName, int portNumber) throws IOException {
+            
             lock.lock(); 
             try {  
-                //if(thread.isAlive())
-                 //   thread.interrupt();
-                //TODO wait  until thread has stopped
+                
                 if(selector == null)
                     selector = Selector.open();
                 
                 SocketChannel newChannel = SocketChannel.open(new InetSocketAddress(hostName, portNumber));
                 newChannel.configureBlocking(false);
                 newChannel.register(selector, SelectionKey.OP_READ | SelectionKey.OP_WRITE);
+                                 
+                close();
+               
+                channel = newChannel;                
+                 
+                thread = new PacketHandlerThread();
+                thread.setDaemon(true);
+                thread.start();               
+                
+            } finally {
+                lock.unlock(); 
+            }             
+        }
+        
+        public void close() {
+            lock.lock(); 
+            try {                  
+                    if(thread != null && thread.isAlive()) {
+                        try{
+                            thread.interrupt();
+                            thread.join();
+                        } catch(InterruptedException ex)  {}
+                    }
                 
                 if(channel != null)
                     channel.close();
-                
-                channel = newChannel;                
-                 
-                //thread.interrupted();
-                thread.start(); 
-               
-            } finally {
-                lock.unlock(); 
-            }
-        }
-        
-        public void close() throws IOException {
-            lock.lock(); 
-            try {
-                if(channel != null)
-                    channel.close();                 
-            } finally {
+            } catch (IOException ioEx) {
+            } finally {                                                
                 lock.unlock(); 
             }
         }
@@ -97,11 +102,10 @@ abstract class NetworkTcpClient implements NetworkClientApi {
                 
                 while (true) {
                     
-                   // while(Thread.currentThread().isInterrupted()) {
-                        //System.out.println("wait");
-                    //    Thread.yield();
-                   // }
-                    
+                    if(Thread.interrupted()) {
+                        return;
+                    }
+                                        
                     try {
                         selector.select();
                         Set<SelectionKey> selectedKeys = selector.selectedKeys();
@@ -126,7 +130,10 @@ abstract class NetworkTcpClient implements NetworkClientApi {
                             }
                             iter.remove();
                         }
-                    } catch(IOException ioEx) {
+                    } catch(IOException ioEx) {                       
+//                        if(!channel.isConnected()){
+//                            return;
+//                        }
                         //TODO handle Exception
                     }
                     Thread.yield();

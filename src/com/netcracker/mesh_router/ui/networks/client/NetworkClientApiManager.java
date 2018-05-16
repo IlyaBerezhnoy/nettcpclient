@@ -17,7 +17,7 @@ import java.util.concurrent.locks.*;
 public class NetworkClientApiManager {
         
     private static final Object lock = new Object();
-    private NetworkTcpClient mClient;
+    private volatile NetworkTcpClient mClient = null;
         
     private NetworkClientApiManager() {}
     
@@ -32,7 +32,7 @@ public class NetworkClientApiManager {
     public NetworkClientApi getClient() {
         synchronized(lock) {
             if(mClient == null)
-                throw new RuntimeException("Network channel is not initialized");
+                throw new RuntimeException("Network channel is not initialized");           
             return mClient;
         }
         
@@ -44,8 +44,8 @@ public class NetworkClientApiManager {
                 NetworkTcpClient tcpClient = new NetworkRpcClient();
                 tcpClient.connect(hostName, portNumber);
                 mClient = tcpClient; 
-            } else {                
-                mClient.connect(hostName, portNumber);
+            } else {                        
+                mClient.connect(hostName, portNumber);                
             }          
         }
     }  

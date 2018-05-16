@@ -29,16 +29,16 @@ public class NetworkRegistrationService {
                 for(int i=0;i< Integer.parseInt(args[3]);i++){                     
                     new Thread(server).start();                
                 }
-            } else if(args[0].equals("client")) {
-                NetworkClientApiManager.getInstance().initClient(args[1], Integer.parseInt(args[2]));
-                ClientRunner client = new ClientRunner(NetworkClientApiManager.getInstance().getClient());
-                for(int i=0;i<Integer.parseInt(args[3]);i++){                                        
-                    new Thread(client).start();                
-                }
-                Thread.sleep(40);
-                NetworkClientApiManager.getInstance().initClient(args[1], Integer.parseInt(args[2])+1);
-                Thread.sleep(1);
-                NetworkClientApiManager.getInstance().initClient(args[1], Integer.parseInt(args[2]));
+            } else if(args[0].equals("client")) {      
+                NetworkClientApiManager.getInstance().initClient(args[1], Integer.parseInt(args[2]));                
+                NetworkClientApiManager.getInstance().initClient(args[1], Integer.parseInt(args[2]));                 
+                ClientRunner client = new ClientRunner(NetworkClientApiManager.getInstance().getClient());                
+                for(int i=0;i<Integer.parseInt(args[3]);i++){                      
+                    new Thread(client).start();                                    
+                } 
+                 
+//                Thread.sleep(1);
+//                NetworkClientApiManager.getInstance().initClient(args[1], Integer.parseInt(args[2]));
             }
             
         } catch(Exception ex) {
